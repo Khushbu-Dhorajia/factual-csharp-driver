@@ -12,6 +12,13 @@ namespace FactualDriver
     {
         private List<IFilter> _filters = new List<IFilter>();
 
+        public Parameters() {}
+
+        public Parameters(List<IFilter> filters)
+        {
+            _filters = filters;
+        }
+
         /// <summary>
         /// Adds filter to collection
         /// </summary>
@@ -103,6 +110,11 @@ namespace FactualDriver
         public IFilter[] ToFilterArray()
         {
             return _filters.ToArray();
+        }
+
+        public Parameters Copy()
+        {
+            return new Parameters(new List<IFilter>(_filters));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Web;
 using FactualDriver.Exceptions;
 using FactualDriver.Filters;
@@ -234,6 +235,8 @@ namespace FactualDriver
             return RawQuery(UrlForMulti(), MultiQuery.ToUrlQuery());
         }
 
+        //private string FlagCustome(string root, string flagType, )
+
         protected static String UrlForCrosswalk(String tableName)
         {
             return tableName + "/crosswalk";
@@ -298,19 +301,25 @@ namespace FactualDriver
                 System.Diagnostics.Debug.WriteLine("==== Request Url =====");
                 System.Diagnostics.Debug.WriteLine(request.RequestUri);
             }
-                
+
+            return ReadRequest(completePathWithQuery, request);
+        }
+
+        private string ReadRequest(string completePathWithQuery, HttpWebRequest request)
+        {
+            string jsonResult;
             try
             {
-                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var response = (HttpWebResponse) request.GetResponse())
                 {
                     using (var stream = response.GetResponseStream())
                     {
-                        if(stream == null)
+                        if (stream == null)
                             throw new FactualException("Did not receive a response stream from factual");
 
                         using (var reader = new StreamReader(stream))
                         {
-                            var jsonResult = reader.ReadToEnd();
+                            jsonResult = reader.ReadToEnd();
                             if (string.IsNullOrEmpty(jsonResult))
                                 throw new FactualException("No data received from factual");
 
@@ -319,19 +328,16 @@ namespace FactualDriver
                                 System.Diagnostics.Debug.WriteLine("===== Factual Response =====");
                                 System.Diagnostics.Debug.WriteLine(jsonResult);
                             }
-
-                            return jsonResult;
                         }
                     }
-
                 }
             }
             catch (WebException ex)
             {
-                var response = ((HttpWebResponse)ex.Response);
+                var response = ((HttpWebResponse) ex.Response);
                 using (var stream = response.GetResponseStream())
                 {
-                    if(stream == null)
+                    if (stream == null)
                         throw new FactualApiException(response.StatusCode, string.Empty, completePathWithQuery);
 
                     using (var reader = new StreamReader(stream))
@@ -348,6 +354,28 @@ namespace FactualDriver
                     }
                 }
             }
+            return jsonResult;
+        }
+
+        public string PostRequest(string completePathWithQuery, string postData)
+        {
+            var request = CreateWebRequest("POST", completePathWithQuery);
+            if (Debug)
+            {
+                System.Diagnostics.Debug.WriteLine("==== Request Url =====");
+                System.Diagnostics.Debug.WriteLine(request.RequestUri);
+            }
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = byteArray.Length;
+
+            using (Stream dataStream = request.GetRequestStream())
+            {
+                dataStream.Write(byteArray, 0 , byteArray.Length);
+            }
+
+            return ReadRequest(completePathWithQuery, request);
         }
     }
 }
