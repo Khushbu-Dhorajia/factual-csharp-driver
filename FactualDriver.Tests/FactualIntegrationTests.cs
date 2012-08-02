@@ -651,6 +651,17 @@ namespace FactualDriver.Tests
             Assert.IsTrue(((int)json.response.included_rows) == 14);
         }
 
+        [Test]
+        public void TestFlagDuplicate()
+        {
+            //Arrange
+            var response = Factual.FlagDuplicate("2EH4Pz", "f33527e0-a8b4-4808-a820-2686f18cb00c", new Metadata().User("test_driver_user"));
+           
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+
         private void AssertAll(string response, string key, string valueToCheck)
         {
             dynamic json = JsonConvert.DeserializeObject(response);

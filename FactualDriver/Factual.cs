@@ -277,6 +277,88 @@ namespace FactualDriver
             return "multi";
         }
 
+        protected static string UrlForFlag(string tableName, string factualId)
+        {
+            return "t/" + tableName + "/" + factualId + "/flag";
+        }
+
+        /// <summary>
+        /// Flags a row as a duplicate in the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to flag a duplicate for (e.g., "places")</param>
+        /// <param name="factualId">the factual id that is the duplicate</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response from flagging a duplicate row.</returns>
+        public string FlagDuplicate(string tableName, string factualId, Metadata metadata)
+        {
+            return FlagCustom(UrlForFlag(tableName, factualId), "duplicate", metadata);
+        }
+
+        /// <summary>
+        /// Flags a row as inaccurate in the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to flag a duplicate for (e.g., "places")</param>
+        /// <param name="factualId">the factual id that is the duplicate</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response from flagging a duplicate row.</returns>
+        public string FlagInaccurate(string tableName, string factualId, Metadata metadata)
+        {
+            return FlagCustom(UrlForFlag(tableName, factualId), "inaccurate", metadata);
+        }
+
+        /// <summary>
+        /// Flags a row as inappropriate in the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to flag a duplicate for (e.g., "places")</param>
+        /// <param name="factualId">the factual id that is the duplicate</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response from flagging a duplicate row.</returns>
+        public string FlagInappropriate(string tableName, string factualId, Metadata metadata)
+        {
+            return FlagCustom(UrlForFlag(tableName, factualId), "inappropriate", metadata);
+        }
+
+        /// <summary>
+        /// Flags a row as non-existent in the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to flag a duplicate for (e.g., "places")</param>
+        /// <param name="factualId">the factual id that is the duplicate</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response from flagging a duplicate row.</returns>
+        public string FlagNonExistent(string tableName, string factualId, Metadata metadata)
+        {
+            return FlagCustom(UrlForFlag(tableName, factualId), "nonexistent", metadata);
+        }
+
+        /// <summary>
+        /// Flags a row as spam in the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to flag a duplicate for (e.g., "places")</param>
+        /// <param name="factualId">the factual id that is the duplicate</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response from flagging a duplicate row.</returns>
+        public string FlagSpam(string tableName, string factualId, Metadata metadata)
+        {
+            return FlagCustom(UrlForFlag(tableName, factualId), "spam", metadata);
+        }
+
+        /// <summary>
+        /// Flags a row as problematic in the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to flag a duplicate for (e.g., "places")</param>
+        /// <param name="factualId">the factual id that is the duplicate</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response from flagging a duplicate row.</returns>
+        public string FlagOther(string tableName, string factualId, Metadata metadata)
+        {
+            return FlagCustom(UrlForFlag(tableName, factualId), "other", metadata);
+        }
+
+        public string FlagCustom(string root, string flagType, Metadata metadata)
+        {
+            return RequestPost(root, "problem=" + flagType + "&" + metadata.ToUrlQuery());
+        }
+
         /// <summary>
         /// Execute a path against a factual api with raw path and query parameters and return a json string
         /// </summary>
@@ -357,13 +439,15 @@ namespace FactualDriver
             return jsonResult;
         }
 
-        public string PostRequest(string completePathWithQuery, string postData)
+        public string RequestPost(string completePathWithQuery, string postData)
         {
             var request = CreateWebRequest("POST", completePathWithQuery);
             if (Debug)
             {
                 System.Diagnostics.Debug.WriteLine("==== Request Url =====");
                 System.Diagnostics.Debug.WriteLine(request.RequestUri);
+                System.Diagnostics.Debug.WriteLine("==== Request POST data =====");
+                System.Diagnostics.Debug.WriteLine(postData);
             }
 
             byte[] byteArray = Encoding.UTF8.GetBytes(postData);

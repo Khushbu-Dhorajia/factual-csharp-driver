@@ -22,7 +22,7 @@ namespace FactualDriver
         /// <param name="queryParameters">Query parameters</param>
         public Metadata(Parameters queryParameters)
         {
-            queryParameters = queryParameters;
+            _queryParameters = queryParameters;
         }
 
         /// <summary>
