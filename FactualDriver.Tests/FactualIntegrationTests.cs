@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using FactualDriver.Exceptions;
 using FactualDriver.Filters;
 using NUnit.Framework;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
 namespace FactualDriver.Tests
@@ -661,6 +663,117 @@ namespace FactualDriver.Tests
             AssertReceivedOkResponse(response);
         }
 
+        [Test]
+        public void TestFlagInaccurate()
+        {
+            //Arrange
+            var response = Factual.FlagInaccurate("2EH4Pz", "f33527e0-a8b4-4808-a820-2686f18cb00c", new Metadata().User("test_driver_user"));
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestFlagInappropriate()
+        {
+            //Arrange
+            var response = Factual.FlagInappropriate("2EH4Pz", "f33527e0-a8b4-4808-a820-2686f18cb00c", new Metadata().User("test_driver_user"));
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestFlagNonExistent()
+        {
+            //Arrange
+            var response = Factual.FlagNonExistent("2EH4Pz", "f33527e0-a8b4-4808-a820-2686f18cb00c", new Metadata().User("test_driver_user"));
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestFlagSpam()
+        {
+            //Arrange
+            var response = Factual.FlagSpam("2EH4Pz", "f33527e0-a8b4-4808-a820-2686f18cb00c", new Metadata().User("test_driver_user"));
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestFlagOther()
+        {
+            //Arrange
+            var response = Factual.FlagOther("2EH4Pz", "f33527e0-a8b4-4808-a820-2686f18cb00c", new Metadata().User("test_driver_user"));
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestDiffs()
+        {
+            //Arrange
+            DiffsQuery diff = new DiffsQuery(1339123455775);
+
+            //Act
+            string response = Factual.Fetch("2EH4Pz", diff);
+            //Assert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestSubmitAdd()
+        {
+            //Arrange
+            Submit submit = new Submit()
+                .AddValue("longitude", 100);
+            var response = Factual.Submit("2EH4Pz", submit, new Metadata().User("test_driver_user"));
+
+            //Asert
+            AssertReceivedOkResponse(response);
+        }
+
+        [Test]
+        public void TestSubmitEdit()
+        {
+            //Arrange
+            Submit submit = new Submit()
+                .AddValue("longitude", 100);
+            var response = Factual.Submit("2EH4Pz", "0545b03f-9413-44ed-8882-3a9a461848da", submit, new Metadata().User("test_driver_user"));
+
+            //Asert
+            AssertReceivedOkResponse(response);
+            dynamic json = JsonConvert.DeserializeObject(response);
+            Assert.IsFalse((bool)json.response.new_entity);
+
+        }
+
+        [Test]
+        public void TestSubmitDelete()
+        {
+            //Arrange
+            Submit submit = new Submit()
+                .RemoveValue("longitude");
+            var response = Factual.Submit("2EH4Pz", "0545b03f-9413-44ed-8882-3a9a461848da", submit, new Metadata().User("test_driver_user"));
+
+            //Asert
+            AssertReceivedOkResponse(response);
+            dynamic json = JsonConvert.DeserializeObject(response);
+            Assert.IsFalse((bool)json.response.new_entity);
+        }
+
+        [Test]
+
+        public void TestSubmitError()
+        {
+            //Arrange
+            Submit submit = new Submit()
+                .RemoveValue("longitude");
+
+            var exception = Assert.Throws<FactualApiException>(
+                () => Factual.Submit("2EH4Pz", "randomwrongid", submit, new Metadata().User("test_driver_user")));
+            //Asert
+            Assert.IsNotNull(exception);
+        }
 
         private void AssertAll(string response, string key, string valueToCheck)
         {

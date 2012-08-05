@@ -134,6 +134,49 @@ namespace FactualDriver
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="diff"></param>
+        /// <returns></returns>
+        public string Fetch(string tableName, DiffsQuery diff)
+        {
+            return RawQuery(UrlForFetch(tableName) + "/diffs", diff.ToUrlQuery());
+        }
+
+        /// <summary>
+        /// Runs a Submit input against the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to submit updates for (e.g., "places")</param>
+        /// <param name="submit">the submit parameters to run against table</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response of running submit against Factual.</returns>
+        public string Submit(string tableName, Submit submit, Metadata metadata)
+        {
+            return SubmitCustom("t/" + tableName + "/submit", submit, metadata);
+        }
+
+
+        /// <summary>
+        /// Runs a Submit input against the specified Factual table.
+        /// </summary>
+        /// <param name="tableName">the name of the table you wish to submit updates for (e.g., "places")</param>
+        /// <param name="factualId">the factual id on which the submit is run</param>
+        /// <param name="submit">the submit parameters to run against table</param>
+        /// <param name="metadata">the metadata to send with information on this request</param>
+        /// <returns>the response of running submit against Factual.</returns>
+        public string Submit(string tableName, string factualId, Submit submit, Metadata metadata)
+        {
+            return SubmitCustom("t/" + tableName + "/" + factualId + "/submit", submit, metadata);
+        }
+
+        private string SubmitCustom(string root, Submit submit, Metadata metadata)
+        {
+            var postData = submit.ToUrlQuery() + "&" + metadata.ToUrlQuery();
+            return RequestPost(root + "?" + postData, "");
+        }
+
+        /// <summary>
         /// Run a schema query against the specified Factual table.
         /// </summary>
         /// <param name="tableName">the name of the table you wish to query (e.g., "places")</param>
@@ -356,7 +399,8 @@ namespace FactualDriver
 
         public string FlagCustom(string root, string flagType, Metadata metadata)
         {
-            return RequestPost(root, "problem=" + flagType + "&" + metadata.ToUrlQuery());
+            var postData = "problem=" + flagType + "&" + metadata.ToUrlQuery();
+            return RequestPost(root + "?" + postData, "");
         }
 
         /// <summary>
@@ -446,10 +490,8 @@ namespace FactualDriver
             {
                 System.Diagnostics.Debug.WriteLine("==== Request Url =====");
                 System.Diagnostics.Debug.WriteLine(request.RequestUri);
-                System.Diagnostics.Debug.WriteLine("==== Request POST data =====");
-                System.Diagnostics.Debug.WriteLine(postData);
             }
-
+            
             byte[] byteArray = Encoding.UTF8.GetBytes(postData);
             request.ContentType = "application/x-www-form-urlencoded";
             request.ContentLength = byteArray.Length;
@@ -458,6 +500,7 @@ namespace FactualDriver
             {
                 dataStream.Write(byteArray, 0 , byteArray.Length);
             }
+
 
             return ReadRequest(completePathWithQuery, request);
         }
